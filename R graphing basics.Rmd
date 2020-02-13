@@ -1,0 +1,255 @@
+---
+title: "R graphing basics"
+author: "L.Lofgren & D.Carterhouse"
+date: "2/10/2020"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+  R is a language that excells at plotting and statistical analysis 
+  Today we're going to talk about plotting, and get some hands-on practice at plotting and problem selving. 
+  
+  We'll start by some basic plot types and compare/contrast base and gg-plot
+  
+  NOTE: We are going to make some assumptions here about getting your data into R in the first place (this should be it's own  workshop). 
+  
+  Today we'll use a standardized dataset that's preloaded in R's envronment:
+  (Orange) - demo only
+  (Cabbage) - used in workshop 
+
+---
+
+## If you get lost 
+
+
+This markdown document is avalible on googledrive 
+
+If you need help with syntax:
+
+help(<plot-type>)
+
+Help-> Cheat Sheets
+
+---
+
+## Plot types
+
+We're going to go over a few basic plot types:
+
+- Strip charts 
+- Boxplots
+- Scatter plots
+
+We're going to render each plot type in two ways, useing base and gg-plot
+
+---
+
+## What's the difference? 
+ - **base:** base R uses only functions that come preinstalled into R's envronement  
+    *pros:* 
+    + highly flexible    
+    
+    *cons:* 
+    + learning curve is greater     
+    + grammer is inconsistant between plot types  
+    
+ ---
+
+ - **ggplot:** is a graphics package (an extentsion) for R   
+    *pros:*  
+    + easier to hit the ground running   
+    + consistant grammar   
+    + ease of multi-paneling  
+    + ease of pre-packaged color libraries   
+    
+    *cons:* 
+     + not flexible   
+     + kinda dorky
+        
+---
+
+
+## get the data
+```{r get the data}
+
+#load libraries
+library(ggplot2)
+
+#load the data: 
+data()
+data(Orange)
+
+#get info about your data
+
+#View(Orange)
+#?Orange
+str(Orange)
+head(Orange)
+```
+
+---
+
+## Strip charts
+- Base
+```{r strip charts}
+# rememebr if you need help:
+help(stripchart)
+
+stripchart(Orange$age)
+
+```
+
+---
+
+```{r}
+
+stripchart(Orange$circumference ~ Orange$Tree,
+           method="jitter", 
+           vertical=TRUE,
+           main='Oranges',
+           xlab='Tree ID',
+           ylab='Tree circumference',
+           pch = 16, 
+           col = c("#326773", "#557329", "#A68217", "#D9751E", "#F2622E"))
+
+```
+
+--- 
+
+```{r}
+
+Orange$Tree
+Orange$Tree <- factor(Orange$Tree, levels = c(1, 2, 3, 4, 5))
+```
+
+---
+
+```{r}
+
+help(sort)
+stripchart(Orange$circumference ~ Orange$Tree,
+           method="jitter", 
+           vertical=TRUE,
+           main='Oranges',
+           xlab='Tree ID',
+           ylab='Tree circumference',
+           pch = 16, 
+           col = c("#326773", "#557329", "#A68217", "#D9751E", "#F2622E"))
+```
+
+---
+
+## the anatomy of a gg-plot  
+gg-calls this the "grammar of graphics"
+
+- gg = "grid graphics"
+
+- devided into blocks of arguments 
+  *  data: a data frame: categorical, numeric etc.
+  *  aesthetic mapping (aec) of variables into visual properties: size, color, x, y
+  *  geometric objects (geom): points, lines, areas, arrows, …
+  *  coordinate system (coord): Cartesian, log, polar, map, 
+  
+--- 
+
+## example:
+
+```{r gg plot example}
+ggplot(data = Orange, 
+       aes(x=Tree, y=circumference, color=Tree)) +
+ geom_jitter(width = 0.25, size=3) 
+
+```
+
+---
+
+## use theme_minimal()
+
+```{r example w/ minimual}
+my_plot<- ggplot(Orange, aes(x=Tree, y=circumference, color=Tree)) +
+ geom_jitter(width = 0.25, size=3) 
+my_plot + theme_minimal()
+ 
+```
+
+---
+
+## note - you can set minimal as the default like so:
+
+```{r}
+library(ggplot2)
+theme_set(
+  theme_minimal() +
+    theme(legend.position = "right")
+  )
+```
+
+---
+
+Color resources:
+
+https://color.adobe.com/  
+R-color brewer  
+lots and lots and lots more  
+
+---
+
+## box plots
+
+#base
+```{r}
+boxplot(circumference~Tree, data = Orange,
+        ylim=c(0,max(Orange$circumference)),
+        main="Oranges",
+        ylab="circumference",
+        axis.lty="solid", 
+        col = c("#326773", "#557329", "#A68217", "#D9751E", "#F2622E"),
+        axisnames = TRUE, 
+        cex.names = .4, 
+        las =1)
+
+```
+
+---
+
+## show your data
+```{r}
+stripchart(circumference~Tree, data = Orange, xlim=c(0.5,6.5), vertical=TRUE, method="stack", offset=0.8, pch=19,
+main = "Oranges", xlab = "Tree ID", ylab = "circumference")
+
+boxplot(circumference~Tree, data = Orange,
+        add=TRUE,
+        range=0,
+        ylim=c(0,max(Orange$circumference)),
+        main="Oranges",
+        ylab="circumference",
+        axis.lty="solid", 
+        col = c("#32677399", "#55732999", "#A6821799", "#D9751E99", "#F2622E99"),
+        axisnames = TRUE, 
+        cex.names = .4, 
+        las =1, 
+        #whisklty = 0, 
+        staplelty = 0)
+
+```
+
+--- 
+
+## gg-plot
+```{r}
+my_plot<- ggplot(Orange, aes(x=Tree, y=circumference, color=Tree)) +
+  geom_jitter(width = 0.25, size=3, show.legend = FALSE)
+my_plot + theme_minimal() + geom_boxplot(aes(alpha = .2), show.legend = FALSE) 
+```
+
+---
+
+```{r}
+#add grouping variable for strip chart
+# "#D9751E","#F2622E")[as.numeric(Orange$Tree)])
+```
+
